@@ -10,7 +10,7 @@ const ChatbotEmbed = () => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    // Send 'init' message once iframe loads
+    // Send 'init' message once iframe loads-----------
     const handleLoad = () => {
       iframe.contentWindow?.postMessage({ type: "init" }, CHATBOT_ORIGIN);
     };
