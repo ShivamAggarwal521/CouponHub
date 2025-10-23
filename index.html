@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/Voucherly.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voucherly</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- 🧠 Your React app entry -->
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- 🌐 Chatbot Bridge Configuration -->
+    <script>
+      // ⚙️ Set your backend API base
+      window.HOST_BRIDGE_BASE_URL = " https://461bc5154488.ngrok-free.app"; 
+      // 👉 Change to your deployed backend later, e.g. https://your-backend.example.com
+
+      // ⚙️ Allow your chatbot iframe origin (the one in ChatbotEmbed src)
+      window.ALLOWED_CHATBOT_IFRAME_ORIGINS = "https://linguistic-charlotte-nonpromotive.ngrok-free.dev"; 
+      // 👆 Must match EXACTLY the origin (no trailing slash!)
+
+      // 🪵 Debug logs
+      console.log("[Bridge Config] HOST_BRIDGE_BASE_URL:", window.HOST_BRIDGE_BASE_URL);
+      console.log("[Bridge Config] ALLOWED_CHATBOT_IFRAME_ORIGINS:", window.ALLOWED_CHATBOT_IFRAME_ORIGINS);
+    </script>
+
+    <!-- 🔌 Include the Host Bridge script -->
+    <script src="https://2c6e8a477dc2.ngrok-free.app/bridge.js"></script>
+  </body>
+</html>
