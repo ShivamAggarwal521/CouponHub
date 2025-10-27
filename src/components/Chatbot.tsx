@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Box } from "@mui/material";
 
-const CHATBOT_ORIGIN = "https://chatbot.aicte-india.org"; // Remove trailing /chatbot/
+const CHATBOT_ORIGIN = "https://chatbot.aicte-india.org";
 
 const ChatbotEmbed = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -11,27 +11,45 @@ const ChatbotEmbed = () => {
     if (!iframe) return;
 
     const parentHost = window.location.hostname;
-    console.log("🌐 Parent hostname:", parentHost); // Should show: coupon-hub-chi.vercel.app
+    console.log("🌐 Parent hostname:", parentHost);
 
-    const handleLoad = () => {
-      console.log("✅ Iframe loaded, sending doc_id to:", CHATBOT_ORIGIN);
+    let readyReceived = false;
+
+    const sendDocId = () => {
+      if (!iframe.contentWindow) return;
       
-      // Send message
-      iframe.contentWindow?.postMessage(
+      console.log("📤 Sending doc_id:", parentHost);
+      iframe.contentWindow.postMessage(
         { type: "SET_DOC_ID", docId: parentHost },
         CHATBOT_ORIGIN
       );
-      
-      console.log("📤 Sent doc_id:", parentHost);
     };
 
-    iframe.addEventListener("load", handleLoad);
+    const handleLoad = () => {
+      console.log("✅ Iframe loaded");
+      
+      // Send immediately on load
+      sendDocId();
+      
+      // Also send after a short delay (backup)
+      setTimeout(sendDocId, 500);
+      setTimeout(sendDocId, 1000);
+    };
 
     const handleMessage = (event: MessageEvent) => {
       if (!event.origin.includes("chatbot.aicte-india.org")) return;
-      console.log("📩 Message from chatbot iframe:", event.data);
+      
+      console.log("📩 Message from chatbot:", event.data);
+      
+      // When chatbot signals it's ready, send doc_id
+      if (event.data?.type === "CHATBOT_READY" && !readyReceived) {
+        readyReceived = true;
+        console.log("✅ Chatbot ready! Sending doc_id now");
+        sendDocId();
+      }
     };
 
+    iframe.addEventListener("load", handleLoad);
     window.addEventListener("message", handleMessage);
 
     return () => {
@@ -67,27 +85,9 @@ const ChatbotEmbed = () => {
         style={{ border: "none", display: "block", overflow: "hidden" }}
         title="Chatbot"
         scrolling="no"
-        allow="cross-origin-isolated"
       />
     </Box>
   );
 };
 
 export default ChatbotEmbed;
-// ```
-
-// ## What should happen:
-
-// **On Parent Site (`coupon-hub-chi.vercel.app`):**
-// ```
-// 🌐 Parent hostname: coupon-hub-chi.vercel.app
-// ✅ Iframe loaded, sending doc_id to: https://chatbot.aicte-india.org
-// 📤 Sent doc_id: coupon-hub-chi.vercel.app
-// ```
-
-// **On Chatbot Iframe:**
-// ```
-// 👂 Message listener initialized, waiting for parent doc_id...
-// 📩 ✅ Received doc_id from parent: coupon-hub-chi.vercel.app from origin: https://coupon-hub-chi.vercel.app
-// ✅ doc_id already available: coupon-hub-chi.vercel.app
-// 📤 Sending to backend with doc_id: coupon-hub-chi.vercel.app
