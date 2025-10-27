@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Box } from "@mui/material";
 
-const CHATBOT_ORIGIN = "https://chatbot.aicte-india.org";
-
 const ChatbotEmbed = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -17,31 +15,26 @@ const ChatbotEmbed = () => {
 
     const sendDocId = () => {
       if (!iframe.contentWindow) return;
-      
       console.log("📤 Sending doc_id:", parentHost);
       iframe.contentWindow.postMessage(
         { type: "SET_DOC_ID", docId: parentHost },
-        CHATBOT_ORIGIN
+        "*" // ✅ Changed from CHATBOT_ORIGIN to '*'
       );
     };
 
     const handleLoad = () => {
       console.log("✅ Iframe loaded");
-      
-      // Send immediately on load
       sendDocId();
-      
-      // Also send after a short delay (backup)
       setTimeout(sendDocId, 500);
       setTimeout(sendDocId, 1000);
+      setTimeout(sendDocId, 2000);
+      setTimeout(sendDocId, 3000); // ✅ safety resend
     };
 
     const handleMessage = (event: MessageEvent) => {
       if (!event.origin.includes("chatbot.aicte-india.org")) return;
-      
       console.log("📩 Message from chatbot:", event.data);
-      
-      // When chatbot signals it's ready, send doc_id
+
       if (event.data?.type === "CHATBOT_READY" && !readyReceived) {
         readyReceived = true;
         console.log("✅ Chatbot ready! Sending doc_id now");
@@ -79,7 +72,7 @@ const ChatbotEmbed = () => {
     >
       <iframe
         ref={iframeRef}
-        src="https://chatbot.aicte-india.org/chatbot/"
+        src="https://chatbot.aicte-india.org/chatbot/" // ✅ Ensure this path matches deployed widget
         width="100%"
         height="100%"
         style={{ border: "none", display: "block", overflow: "hidden" }}
