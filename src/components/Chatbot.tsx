@@ -11,11 +11,17 @@ const ChatbotEmbed = () => {
     if (!iframe) return;
 
     const parentHost = window.location.hostname;
-    console.log("🌐 Parent hostname:", parentHost);
+    console.log("🧭 [PARENT] Detected hostname:", parentHost);
 
-    const sendDocId = () => {
-      if (!iframe.contentWindow) return;
-      console.log("📤 Sending doc_id:", parentHost);
+    let readyReceived = false;
+
+    const sendDocId = (label = "") => {
+      if (!iframe.contentWindow) {
+        console.warn("⚠️ [PARENT] iframe.contentWindow missing, skipping postMessage");
+        return;
+      }
+      console.log(`📤 [PARENT -> IFRAME] Sending doc_id (${label}):`, parentHost);
+
       iframe.contentWindow.postMessage(
         { type: "SET_DOC_ID", docId: parentHost },
         CHATBOT_ORIGIN
@@ -23,18 +29,28 @@ const ChatbotEmbed = () => {
     };
 
     const handleLoad = () => {
-      console.log("✅ Iframe loaded");
-      sendDocId();
-      // Backup sends in case iframe loads slowly
-      setTimeout(sendDocId, 500);
-      setTimeout(sendDocId, 1000);
+      console.log("✅ [PARENT] Iframe loaded");
+      sendDocId("onload");
+      setTimeout(() => sendDocId("500ms-delay"), 500);
+      setTimeout(() => sendDocId("1000ms-delay"), 1000);
     };
 
     const handleMessage = (event: MessageEvent) => {
-      if (!event.origin.includes("chatbot.aicte-india.org")) return;
-      if (event.data?.type === "CHATBOT_READY") {
-        console.log("🤖 Chatbot ready — sending doc_id again");
-        sendDocId();
+      if (!event.origin.includes("chatbot.aicte-india.org")) {
+        console.warn("🚫 [PARENT] Ignored message from origin:", event.origin);
+        return;
+      }
+
+      console.log("📨 [PARENT <- IFRAME] Message received:", event.data);
+
+      if (event.data?.type === "CHATBOT_READY" && !readyReceived) {
+        readyReceived = true;
+        console.log("🚀 [PARENT] Chatbot ready signal received — sending doc_id");
+        sendDocId("CHATBOT_READY");
+      }
+
+      if (event.data?.type === "DOC_ID_ACK") {
+        console.log("✅ [PARENT] Chatbot acknowledged doc_id:", event.data.docId);
       }
     };
 
@@ -59,19 +75,14 @@ const ChatbotEmbed = () => {
         overflow: "hidden",
         zIndex: 1000,
         backgroundColor: "transparent",
-        "& iframe": {
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        },
       }}
     >
       <iframe
         ref={iframeRef}
-        src="https://chatbot.aicte-india.org/chatbot/"
+        src={`${CHATBOT_ORIGIN}/chatbot/`}
         width="100%"
         height="100%"
-        style={{ border: "none", display: "block", overflow: "hidden" }}
+        style={{ border: "none", display: "block" }}
         title="Chatbot"
         scrolling="no"
       />
