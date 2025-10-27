@@ -25,7 +25,7 @@ const ChatbotEmbed = () => (
     }}
   >
     <iframe
-      src="https://9089e55dbab3.ngrok-free.app"
+      src="https://chatbot.aicte-india.org/chatbot/"
       width="100%"
       height="100%"
       style={{
