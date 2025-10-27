@@ -9,15 +9,17 @@ const ChatbotEmbed = () => {
     if (!iframe) return;
 
     const handleIframeLoad = () => {
-      // ✅ Send parent page info to the chatbot iframe
-      iframe.contentWindow?.postMessage(
-        {
-          type: "INIT_PARENT_INFO",
-          parentUrl: window.location.href, // Full page URL
-        },
-        "https://chatbot.aicte-india.org" // ✅ chatbot origin
-      );
-    };
+  console.log("📤 Sending INIT_PARENT_INFO to iframe:", window.location.href);
+  iframe.contentWindow?.postMessage(
+    {
+      type: "INIT_PARENT_INFO",
+      parentUrl: window.location.href,
+      parentHost: window.location.hostname,
+    },
+    "https://chatbot.aicte-india.org"
+  );
+};
+
 
     iframe.addEventListener("load", handleIframeLoad);
     return () => iframe.removeEventListener("load", handleIframeLoad);
