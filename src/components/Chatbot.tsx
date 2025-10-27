@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { Box } from "@mui/material";
 
-const CHATBOT_ORIGIN = "https://chatbot.aicte-india.org/chatbot/"; // Replace with your iframe origin
+const CHATBOT_ORIGIN = "https://9089e55dbab3.ngrok-free.app"; // Chatbot iframe origin
 
 const ChatbotEmbed = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -10,17 +10,21 @@ const ChatbotEmbed = () => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    // Send 'init' message once iframe loads-----------
+    const parentHost = window.location.hostname;
+
     const handleLoad = () => {
-      iframe.contentWindow?.postMessage({ type: "init" }, CHATBOT_ORIGIN);
+      // ✅ Send both init + parent hostname
+      iframe.contentWindow?.postMessage(
+        { type: "SET_DOC_ID", docId: parentHost },
+        CHATBOT_ORIGIN
+      );
     };
 
     iframe.addEventListener("load", handleLoad);
 
-    // Optional: Listen to messages FROM iframe securely
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== CHATBOT_ORIGIN) return; // Only accept messages from the chatbot
-      console.log("Message from iframe:", event.data);
+      if (event.origin !== CHATBOT_ORIGIN) return;
+      console.log("📩 Message from chatbot iframe:", event.data);
     };
 
     window.addEventListener("message", handleMessage);
@@ -44,9 +48,9 @@ const ChatbotEmbed = () => {
         zIndex: 1000,
         backgroundColor: "transparent",
         "& iframe": {
-          scrollbarWidth: "none", // Firefox
-          msOverflowStyle: "none", // IE/Edge
-          "&::-webkit-scrollbar": { display: "none" }, // Chrome, Safari, Opera
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         },
       }}
     >
