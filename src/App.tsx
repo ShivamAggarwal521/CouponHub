@@ -33,7 +33,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
-          <ChatbotEmbed />
+          {/* <ChatbotEmbed /> */}
         </div>
       </Router>
     </AuthProvider>
