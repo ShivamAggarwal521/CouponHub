@@ -10,7 +10,6 @@ import SellCoupon from './pages/SellCoupon';
 import HowItWorks from './pages/HowItWorks';
 import SafetyGuidelines from './pages/SafetyGuidelines';
 import FAQ from './pages/FAQ';
-import ChatbotEmbed from "./components/Chatbot"
 
 
 function App() {
@@ -33,7 +32,6 @@ function App() {
             </Routes>
           </main>
           <Footer />
-          {/* <ChatbotEmbed /> */}
         </div>
       </Router>
     </AuthProvider>
